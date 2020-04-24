@@ -1,0 +1,69 @@
+<html>
+<head>
+</head>
+<script src="http://koda.nu/simple.js">
+
+  /*
+    Uppgift: Trafikljus!
+    
+    Det finns bilder för grön och röd gubbe:
+    
+    http://koda.nu/bilder/iis/trafikljus/walk_green.png
+    http://koda.nu/bilder/iis/trafikljus/walk_red.png
+    
+    samt bilder för grönt, gult och rött ljus:
+    
+    http://koda.nu/bilder/iis/trafikljus/light_green.png
+    http://koda.nu/bilder/iis/trafikljus/light_yellow.png
+    http://koda.nu/bilder/iis/trafikljus/light_red.png
+    
+    Uppgift 1:
+    
+    Hur kan du modifiera koden nedan så att det blir grönt
+    för gångare när man trycker på en knapp, och då rött för
+    bilar? 
+
+    Du kommer behöva lägga in if-satser som håller koll på 
+    olika knappar på tangentbordet.
+    
+    Uppgift 2:
+    
+    Lägg till en timer som ser till så att det är
+    grönt för gångarna under en viss tid, och sen kopplar det
+    över till bilarna automatiskt.
+    
+    Uppgift 3:
+    
+    När man trycker på knappen för att gå över vägen så ska det inte
+    bli grönt för fotgängare direkt. Först efter 5 sekunder ska det bli
+    gult för bilarna. Sen efter ytterligare 5 sekunder ska det bli rött
+    för bilarna och grönt för fotgängare. Fotgängarna ska få ha grönt
+    i 5 sekunder, och sedan ska de få rött. Efter att de haft rött i 2 sekunder
+    så ska bilarna få grönt.
+    
+  */
+  
+var timer = 0;
+var timerStarted = false;
+function update()
+  {
+    picture(0,0, "http://koda.nu/bilder/iis/trafikljus/street.png", totalWidth, totalHeight);
+    if(timerStarted){ timer += 1; }
+    
+
+    if(keyboard.space)
+    {
+        timerStarted = true;
+    }else{
+        picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_red.png");
+    }
+    picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_green.png");       
+    picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_red.png");
+  }
+
+</script>
+
+
+<body>
+</body>
+</html>
