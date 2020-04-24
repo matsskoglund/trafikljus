@@ -53,12 +53,16 @@ function update()
 
     if(keyboard.space)
     {
-        timerStarted = true;
+      timerStarted = true;
+      picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_green.png"); 
+      picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_red.png");
     }else{
-        picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_red.png");
+      picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_red.png");
+      picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_green.png");
     }
-    picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_green.png");       
-    picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_red.png");
+
+          
+
   }
 
 </script>
