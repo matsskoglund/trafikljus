@@ -42,27 +42,87 @@
     så ska bilarna få grönt.
     
   */
-  
-var timer = 0;
-var timerStarted = false;
-function update()
-  {
-    picture(0,0, "http://koda.nu/bilder/iis/trafikljus/street.png", totalWidth, totalHeight);
-    if(timerStarted){ timer += 1; }
     
-
-    if(keyboard.space)
+  var a = 60;
+  var timer = 0;
+  var timerStarted = false;
+  
+    text (100, 200, 20, timer, "red")
+   
+   function update()
+  {
+      picture(0,0, "http://koda.nu/bilder/iis/trafikljus/street.png", totalWidth, totalHeight);
+    picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_green.png");
+    picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_red.png"); 
+    text (100, 200, 20, timer, "red")
+   
+  
+  if (keyboard.space)
+  {
+    timerStarted = true;
+  }
+    
+    if (timerStarted == true)
     {
-      timerStarted = true;
-      picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_green.png"); 
-      picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_red.png");
-    }else{
-      picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_red.png");
-      picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_green.png");
+      timer += 1;
     }
-
-          
-
+  
+    if (timer > 60 && timer < 120)
+    {
+          picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_yellow.png");
+    }
+    
+    if (timer >= 120 && timer < 230)
+    {
+          picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_red.png");     
+                  
+     }
+    
+     
+    if (timer >= 210 && timer < 270)
+    {
+      picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_yellow.png");
+    }
+    
+    if (timer > 150 && timer < 230)
+     {
+          picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_green.png");
+     }
+    else
+    {
+      picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_red.png");
+    }
+   
+    
+    
+    if (timer == 300)
+    {
+      timerStarted = false;
+      timer = 0
+    }
+  
+  
+  
+    
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   }
 
 </script>
