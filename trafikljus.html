@@ -52,25 +52,40 @@
   const TRAFFIC_START_POS = 250
   const TRAFFIC_END_POS = 1110
   var ticker = TRAFFIC_START_POS
-
+ 
   if(DEBUG)
     text (100, 200, 20, timer, "red")
-   
+  var carRed = {
+      color:"Red", 
+      lane:0, 
+      pos:TRAFFIC_START_POS
+  };   
+  var carBlue = {
+      color:"Blue", 
+      lane:1, 
+      pos:TRAFFIC_START_POS
+  };   
+  var cars = [ carRed, carBlue];
   function update()
   {
+
     // Start
     picture(0,0, "http://koda.nu/bilder/iis/trafikljus/street.png", totalWidth, totalHeight);
-    picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_green.png");
-    picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_red.png"); 
+    //picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_green.png");
+    //picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_red.png"); 
     text (100, 200, 20, timer, "red")
-    
-    if(ticker < TRAFFIC_END_POS)
-      ticker += 3
-    else 
-      ticker = TRAFFIC_START_POS
+    for(i = 0; i < cars.length; i++){
+      if(cars[i].pos >= TRAFFIC_END_POS)
+        cars[i].pos = TRAFFIC_START_POS
+
+      if(trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].pos < 370))|| (cars[i].pos > 370)){
+        cars[i].pos += 3
+      }
+      drawSingelCar(cars[i])
+    }
 
     if(DEBUG)
-      text (200, 200, 20, ticker, "red")
+      text (200, 200, 20, cars[0].pos, "red")
 
     // Press walk button
     if (keyboard.space)
@@ -88,20 +103,37 @@
     picture(totalWidth-70,0,trafficSign)
     picture(0,0,walkSign)
     
-    
-    
-      drawcar(ticker,0,"red")
-      drawcar(ticker,1,"green")
-      drawcar(ticker,2,"blue")
-      drawcar(ticker,3,"yellow")
-      drawcar(ticker,4,"orange")
-      if (timer == 400)
-      {
-        timerStarted = false;
-        timer = 0
-      }
+    //drawcar(ticker,0,"red")
+    drawcar(ticker,1,"green")
+    drawcar(ticker,2,"blue")
+    drawcar(ticker,3,"yellow")
+    drawcar(ticker,4,"orange")
+    if (timer == 400)
+    {
+      timerStarted = false;
+      timer = 0
+    }
   }
 
+ function trafficRunning(timer)
+ {
+  
+    if(timer < 60){
+      
+      return true
+    }else{
+      
+      return false
+    }
+ }
+
+ function walkerWalking(timer)
+ {
+  if(timer >= 160 && timer < 320)
+      return true
+    else
+      return false
+ }
   function getTrafficSign(timer)
   {
 
@@ -110,6 +142,7 @@
     {
         return "http://koda.nu/bilder/iis/trafikljus/light_yellow.png"
     } 
+
     // Show red sign after yellow sign and show it for 
     if (timer >= 120 && timer < 360)
     {
@@ -148,6 +181,14 @@
         return -1
         break;
     }
+  }
+  function drawSingelCar(car)
+  {
+    lanePos = getLanePos(car.lane)
+    rectangle(car.pos,lanePos+20,80,60,car.color)
+    rectangle(car.pos+50,lanePos+30,30,30,"lightblue")
+    circle(car.pos+20,lanePos+80,13,"black")
+    circle(car.pos+60,lanePos+80,13,"black")
   }
   function drawcar(pos,lane,color)
   {
