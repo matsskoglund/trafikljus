@@ -48,41 +48,51 @@
   var timerStarted = false;
   const FIRST_LANE_POS = 200
   const LANE_WIDTH = 136
+  const FIRST_WALKING_LANE_POS = 500
+  const WALKING_LANE_WIDTH = 136
+
   const DEBUG = true
   const TRAFFIC_START_POS = 250
   const TRAFFIC_END_POS = 1110
   var ticker = TRAFFIC_START_POS
- 
+  var carDistanceTimer = 100
+  var generateCars = 40
   if(DEBUG)
     text (100, 200, 20, timer, "red")
-  var carRed = {
-      color:"Red", 
-      lane:0, 
-      pos:TRAFFIC_START_POS
-  };   
-  var carBlue = {
-      color:"Blue", 
-      lane:1, 
-      pos:TRAFFIC_START_POS
-  };   
-  var cars = [ carRed, carBlue];
+  
+  var cars = new Array()
+  var lanes = new Array(5)
   function update()
   {
-
-    // Start
+    // Generate cars 
+    if((generateCars >= 40) && (trafficRunning(timer))){
+      for(laneIdx=0; laneIdx <= 4; laneIdx++){     
+        newCar = {
+          color:getRandomColor(), 
+          lane:laneIdx, 
+          pos:TRAFFIC_START_POS  
+        }; 
+        cars.push(newCar)
+        generateCars = 0
+      }
+    }else if (trafficRunning(timer)){
+      generateCars++
+    }
     picture(0,0, "http://koda.nu/bilder/iis/trafikljus/street.png", totalWidth, totalHeight);
-    //picture(totalWidth-70,0, "http://koda.nu/bilder/iis/trafikljus/light_green.png");
-    //picture(0,0, "http://koda.nu/bilder/iis/trafikljus/walk_red.png"); 
     text (100, 200, 20, timer, "red")
     for(i = 0; i < cars.length; i++){
-      if(cars[i].pos >= TRAFFIC_END_POS)
-        cars[i].pos = TRAFFIC_START_POS
-
       if(trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].pos < 370))|| (cars[i].pos > 370)){
         cars[i].pos += 3
       }
       drawSingelCar(cars[i])
+
+      // Remove car and create new one
+      if(cars[i].pos >= TRAFFIC_END_POS){
+        cars.splice(i, 1)
+        
+      }
     }
+    drawMan(100,0,"red")
 
     if(DEBUG)
       text (200, 200, 20, cars[0].pos, "red")
@@ -102,12 +112,7 @@
     trafficSign = getTrafficSign(timer)
     picture(totalWidth-70,0,trafficSign)
     picture(0,0,walkSign)
-    
-    //drawcar(ticker,0,"red")
-    drawcar(ticker,1,"green")
-    drawcar(ticker,2,"blue")
-    drawcar(ticker,3,"yellow")
-    drawcar(ticker,4,"orange")
+
     if (timer == 400)
     {
       timerStarted = false;
@@ -115,6 +120,14 @@
     }
   }
 
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
  function trafficRunning(timer)
  {
   
@@ -182,6 +195,29 @@
         break;
     }
   }
+  function getWalkingLanePos(laneNo)
+  {
+    switch (laneNo) {
+      case 0:
+        return FIRST_WALKING_LANE_POS
+        break;
+      case 1:
+        return FIRST_WALKING_LANE_POS+WALKING_LANE_WIDTH
+        break;  
+      case 2:
+        return FIRST_WALKING_LANE_POS+WALKING_LANE_WIDTH*2
+        break;  
+      case 3:
+        return FIRST_WALKING_LANE_POS+WALKING_LANE_WIDTH*3
+        break;  
+      case 4:
+        return FIRST_WALKING_LANE_POS+WALKING_LANE_WIDTH*4
+        break;  
+      default:
+        return -1
+        break;
+    }
+  }
   function drawSingelCar(car)
   {
     lanePos = getLanePos(car.lane)
@@ -190,13 +226,14 @@
     circle(car.pos+20,lanePos+80,13,"black")
     circle(car.pos+60,lanePos+80,13,"black")
   }
-  function drawcar(pos,lane,color)
+  function drawMan(pos,lane,color)
   {
-    lanePos = getLanePos(lane)
-    rectangle(pos,lanePos+20,80,60,color)
-    rectangle(pos+50,lanePos+30,30,30,"lightblue")
-    circle(pos+20,lanePos+80,13,"black")
-    circle(pos+60,lanePos+80,13,"black")
+    lanePos = getWalkingLanePos(lane)
+    rectangle(lanePos+53,pos+5,50,28,"red")
+    rectangle(lanePos+48,pos+8,62,20,"red")
+    circle(lanePos+78,pos+20,20,"black")
+    circle(lanePos+78,pos+20,10,"gray")
+    
   }
 
   function drawbike(pos,color)
