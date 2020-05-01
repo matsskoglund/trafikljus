@@ -10,9 +10,7 @@
   var timerStarted = false;
   const FIRST_LANE_POS = 270
   const LANE_WIDTH = 170
-  // const FIRST_WALKING_LANE_POS = 520
-  // const WALKING_LANE_WIDTH = 70
-
+  
   const DEBUG = true
   const TRAFFIC_START_POS = 250
   const WALKER_START_POS = 10
@@ -34,6 +32,7 @@
   var generateCars = 0
   var generatePeople = 40
   var initiated = false
+  var generateCarTimer = 0
 
   var cars = new Array()
   var people = new Array()
@@ -55,31 +54,29 @@
       }
     }
 
-    // Generate cars for each lane
-    for (laneIdx = 0; laneIdx < LANE_COUNT; laneIdx++) {
-      if ((lanes[laneIdx].generateCars == 0)) {
-        newCar = {
+    // Generate cars
+    if(generateCarTimer == 0){
+      laneIdx = random(5)
+      newCar = {
           color: randomColor(),
           lane: laneIdx,
           vehicleType: random(TRAFFIC_TYPE_COUNT),
           speed: random(5) + LOWEST_TRAFFIC_SPEED,
           posX: TRAFFIC_START_POS
         };
-
-        // If there is a car already in the lane do not save the generated car
-        var carInFront = false
-        var p = 0
-        while (carInFront == false && p < cars.length) {
-          if ((newCar.posY == cars[p].posY) && (cars[p].posX - newCar.posX) < 100)
-            carInFront = true
-          p++
-        }
-        if (!carInFront)
-          cars.push(newCar)
-        lanes[laneIdx].generateCars = random(40) + SHORTEST_TIME_BETWEEN_NEW_VECHICLE
-      } else {
-        lanes[laneIdx].generateCars--
+      var carInFront = false
+      var p = 0
+      while (carInFront == false && p < cars.length) {
+        if ((newCar.posY == cars[p].posY) && (cars[p].posX - newCar.posX) < 100)
+          carInFront = true
+        p++
       }
+      if (!carInFront)
+          cars.push(newCar)
+
+        generateCarTimer = random(10) + SHORTEST_TIME_BETWEEN_NEW_VECHICLE
+    }else{
+      generateCarTimer--
     }
 
     // Generate people if generatePeople timer has reached zero    
@@ -155,6 +152,7 @@
       timerStarted = false;
       timer = 0
     }
+    
   }
 
   function getPeopleWaitingCount() {
@@ -233,27 +231,9 @@
     } else
       return "http://koda.nu/bilder/iis/trafikljus/walk_red.png"
   }
+
   function getLanePos(laneNo) {
-    switch (laneNo) {
-      case 0:
-        return FIRST_LANE_POS
-        break;
-      case 1:
-        return FIRST_LANE_POS + LANE_WIDTH
-        break;
-      case 2:
-        return FIRST_LANE_POS + LANE_WIDTH * 2
-        break;
-      case 3:
-        return FIRST_LANE_POS + LANE_WIDTH * 3
-        break;
-      case 4:
-        return FIRST_LANE_POS + LANE_WIDTH * 4
-        break;
-      default:
-        return -1
-        break;
-    }
+    return FIRST_LANE_POS + LANE_WIDTH * laneNo
   }
 
   function drawSingelCar(car) {
