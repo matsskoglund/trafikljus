@@ -1,9 +1,10 @@
 <html>
+
 <head>
 </head>
 <script src="http://koda.nu/simple.js">
 
-    
+
   var a = 60;
   var timer = 0;
   var timerStarted = false;
@@ -28,315 +29,304 @@
   const SAFE_VEHICLE_DISTANCE = 120
 
   var ticker = TRAFFIC_START_POS
-  
+
   var carDistanceTimer = 100
   var generateCars = 0
   var generatePeople = 40
   var initiated = false
-  
+
   var cars = new Array()
   var people = new Array()
   var lanes = new Array()
- 
 
-  function update()
-  {
-    picture(0,0, "http://koda.nu/bilder/iis/trafikljus/street.png", totalWidth, totalHeight);
-    text (200, 200, 20, timer, "blue")
-    if(initiated == false)
-    {
+
+  function update() {
+    picture(0, 0, "http://koda.nu/bilder/iis/trafikljus/street.png", totalWidth, totalHeight);
+    text(200, 200, 20, timer, "blue")
+    if (initiated == false) {
       // Generate traffic lanes
-      for(laneIdx=0;laneIdx<5;laneIdx++){
-        newLane={
+      for (laneIdx = 0; laneIdx < 5; laneIdx++) {
+        newLane = {
           pos: FIRST_LANE_POS,
-          laneIndex:laneIdx,
-          generateCars:0            
+          laneIndex: laneIdx,
+          generateCars: 0
         }
         lanes.push(newLane)
       }
     }
+
     // Generate cars for each lane
-    for(laneIdx=0;laneIdx<LANE_COUNT;laneIdx++){
-      if((lanes[laneIdx].generateCars == 0) ){
+    for (laneIdx = 0; laneIdx < LANE_COUNT; laneIdx++) {
+      if ((lanes[laneIdx].generateCars == 0)) {
         newCar = {
-          color:randomColor(), 
-          lane:laneIdx, 
+          color: randomColor(),
+          lane: laneIdx,
           vehicleType: random(TRAFFIC_TYPE_COUNT),
-          speed: random(5)+LOWEST_TRAFFIC_SPEED,
-          posX:TRAFFIC_START_POS  
-        }; 
+          speed: random(5) + LOWEST_TRAFFIC_SPEED,
+          posX: TRAFFIC_START_POS
+        };
 
         // If there is a car already in the lane do not save the generated car
-        var carInFront = false 
+        var carInFront = false
         var p = 0
-        while(carInFront == false &&  p<cars.length) {            
-          if((newCar.posY == cars[p].posY) && (cars[p].posX - newCar.posX ) < 100)
-            carInFront = true                
+        while (carInFront == false && p < cars.length) {
+          if ((newCar.posY == cars[p].posY) && (cars[p].posX - newCar.posX) < 100)
+            carInFront = true
           p++
         }
-        if(!carInFront)
+        if (!carInFront)
           cars.push(newCar)
-        lanes[laneIdx].generateCars = random(90)+SHORTEST_TIME_BETWEEN_NEW_VECHICLE
-      }else{
+        lanes[laneIdx].generateCars = random(90) + SHORTEST_TIME_BETWEEN_NEW_VECHICLE
+      } else {
         lanes[laneIdx].generateCars--
       }
     }
 
     // Generate people if generatePeople timer has reached zero    
-    if(generatePeople == 0){
+    if (generatePeople == 0) {
       newMan = generatePerson()
-    //   var personInFront = false    
-    //   for(p=0;p<people.length;p++){
-    //     if((newMan.posX == people[p].posX) && (people[p].posY - newMan.posY) < PEOPLE_DISTANCE)
-    //       personInFront = true
-    //   }
-      
-    //   if(!personInFront)
-    //     people.push(newMan)
-       generatePeople = random(30) + 20
-     }else{
-       generatePeople--
+      generatePeople = random(30) + 20
+    } else {
+      generatePeople--
     }
     // Calculate number of people waiting
     peopleInLine = getPeopleWaitingCount()
     if (peopleInLine > 2)
       timerStarted = true
 
-    for(i=0;i<people.length;i++){
+    // Move each person
+    for (i = 0; i < people.length; i++) {
       // Find out if we should stop. If a person is about to run into a car she should stop
       // Loop through each car and find out if the person is close to any car
-      stop = false
-      var j = 0
-      while(j<cars.length){      
-       carPosY = getLanePos(cars[j].lane)       
-       if( (carPosY > people[i].posY  && (carPosY - people[i].posY) < SAFE_VEHICLE_DISTANCE) &&
-             ((abs(people[i].posX - cars[j].posX)) < 350) ) {
-            if((people[i].posX > 500) && (people[i].jaywalker))
-              people[i].posX -= 1
-            
-        }
-        if( (carPosY > people[i].posY  && (carPosY - people[i].posY) < 25) &&
-             ((abs(people[i].posX - cars[j].posX)) < 120) ) {
-            stop = true
-        }
-        j++
-      }
-      var personInFront = false
-      if(i > 0){
-        for(p=0;p<people.length;p++){
-          if((people[i].posX == people[p].posX) && (p<i) && (people[p].posY - people[i].posY)<45)
-            personInFront = true
-        }
-      }
 
-      if(people[i].jaywalker && (!stop) || walkOk(timer) || (people[i].posY < 130 && !personInFront) || (people[i].posY > 130 && (!stop)))
+      stop = shouldStop(people[i])
+
+      pif = isPersonInFront(people[i])
+
+
+      if (people[i].jaywalker && (!stop) || walkOk(timer) || (people[i].posY < 130 && !pif) || (people[i].posY > 130 && (!stop)))
         people[i].posY += people[i].speed
-      
+
       drawPerson(people[i])
     }
-    
+
 
     // Draw cars
-    for(i = 0; i < cars.length; i++){
+    for (i = 0; i < cars.length; i++) {
       // Find out if there is a vehicle in front so we can avoid running into it if we go
       var isCarInFront = false
       var carInFront = null
-      if(i > 0){
+      if (i > 0) {
         var p = 0
-        while(p<cars.length && !isCarInFront){
-        //for(p=0;p<cars.length;p++){
-          if((cars[i].lane == cars[p].lane) && (p<i) && (cars[p].posX - cars[i].posX)<100){
+        while (p < cars.length && !isCarInFront) {
+          if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
             isCarInFront = true
             carInFront = cars[p]
-            //cars[i].speed = cars[p].speed
             cars[i].speed = carInFront.speed
           }
           p++
         }
       }
 
-      if( (trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].posX < 370))|| (cars[i].posX > 370))){
-        if(isCarInFront==false)
+      if ((trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].posX < 370)) || (cars[i].posX > 370))) {
+        if (isCarInFront == false)
           cars[i].posX += cars[i].speed
-        
+
       }
-      if(cars[i].vehicleType == 0)
+      if (cars[i].vehicleType == 0)
         drawSingelCar(cars[i])
-      else 
+      else
         drawSingelBike(cars[i])
 
       // If vehicle has reach end of screen then remove it
-      if(cars[i].posX >= TRAFFIC_END_POS){
-        cars.splice(i, 1)       
+      if (cars[i].posX >= TRAFFIC_END_POS) {
+        cars.splice(i, 1)
       }
     }
-   
+
     // Press walk button
-    if (keyboard.space)
-    {
+    if (keyboard.space) {
       timerStarted = true;
     }
-      
-    if (timerStarted == true)
-    {
+
+    if (timerStarted == true) {
       timer += 1;
     }
 
-    walkSign = getWalkSign(timer) 
+    walkSign = getWalkSign(timer)
     trafficSign = getTrafficSign(timer)
-    picture(totalWidth-70,0,trafficSign)
-    picture(0,0,walkSign)
+    picture(totalWidth - 70, 0, trafficSign)
+    picture(0, 0, walkSign)
 
-    if (timer == 900)
-    {
+    if (timer == 900) {
       timerStarted = false;
       timer = 0
     }
   }
 
-  function getPeopleWaitingCount(){
+  function getPeopleWaitingCount() {
     var peopleInLine = 0
-    for(p=0;p<people.length;p++){
-      if(people[p].posY < 130)
+    for (p = 0; p < people.length; p++) {
+      if (people[p].posY < 130)
         peopleInLine++
     }
     return peopleInLine
   }
-function generatePerson(){
 
-  // Generate a jayWalker if threshhold is above specified number
-  var randomNumber = random(100)
-  var jayWalker = false
-  walkSpeed = NORMAL_WALKSPEED
-  if(randomNumber > (100-JAYWALKER_PERCENTAGE)){
-    jayWalker = true
-    walkSpeed = 6
-  }
+  function generatePerson() {
 
-  newMan = {
-        color:randomColor(),
-        lane:laneIdx, 
-        posY:WALKER_START_POS,
-        posX: 520 + random(5)*70,
-        jaywalker: jayWalker,
-        speed: walkSpeed
-      }; 
-////////
-  var personInFront = false    
-  for(p=0;p<people.length;p++){
-    if((newMan.posX == people[p].posX) && (people[p].posY - newMan.posY) < PEOPLE_DISTANCE)
-      personInFront = true
+    // Generate a jayWalker if threshhold is above specified number
+    var randomNumber = random(100)
+    var jayWalker = false
+    walkSpeed = NORMAL_WALKSPEED
+    if (randomNumber > (100 - JAYWALKER_PERCENTAGE)) {
+      jayWalker = true
+      walkSpeed = 6
+    }
+
+    newMan = {
+      color: randomColor(),
+      lane: laneIdx,
+      posY: WALKER_START_POS,
+      posX: 520 + random(5) * 70,
+      jaywalker: jayWalker,
+      speed: walkSpeed
+    };
+    ////////
+    var personInFront = false
+    for (p = 0; p < people.length; p++) {
+      if ((newMan.posX == people[p].posX) && (people[p].posY - newMan.posY) < PEOPLE_DISTANCE)
+        personInFront = true
+    }
+
+    if (!personInFront)
+      people.push(newMan)
   }
-    
-  if(!personInFront)
-    people.push(newMan)
-}
- function trafficRunning(timer)
- {
-    if(timer < 60){      
+  function trafficRunning(timer) {
+    if (timer < 60) {
       return true
-    }else{      
+    } else {
       return false
     }
- }
+  }
 
- function walkOk(timer)
- {
-    if(timer >= 250 && timer < 520){      
+  function walkOk(timer) {
+    if (timer >= 250 && timer < 520) {
       return true
-    }else{
-      
+    } else {
+
       return false
     }
- }
+  }
 
 
-  function getTrafficSign(timer)
-  {
+  function getTrafficSign(timer) {
 
     // Show yellow sign after a short while from button has been pressed and show it for 
-    if ((timer > 60 && timer < 120) || (timer >= 800))
-    {
-        return "http://koda.nu/bilder/iis/trafikljus/light_yellow.png"
-    } 
+    if ((timer > 60 && timer < 120) || (timer >= 800)) {
+      return "http://koda.nu/bilder/iis/trafikljus/light_yellow.png"
+    }
 
     // Show red sign after yellow sign and show it for 
-    if (timer >= 120 && timer < 800)
-    {
-        return "http://koda.nu/bilder/iis/trafikljus/light_red.png"
+    if (timer >= 120 && timer < 800) {
+      return "http://koda.nu/bilder/iis/trafikljus/light_red.png"
     }
     return "http://koda.nu/bilder/iis/trafikljus/light_green.png"
   }
 
-  function getWalkSign(timer)
-  {
-    if (timer >= 250 && timer < 520)
-    {
+  function getWalkSign(timer) {
+    if (timer >= 250 && timer < 520) {
       return "http://koda.nu/bilder/iis/trafikljus/walk_green.png"
-    }else 
+    } else
       return "http://koda.nu/bilder/iis/trafikljus/walk_red.png"
   }
-  function getLanePos(laneNo)
-  {
+  function getLanePos(laneNo) {
     switch (laneNo) {
       case 0:
         return FIRST_LANE_POS
         break;
       case 1:
-        return FIRST_LANE_POS+LANE_WIDTH
-        break;  
+        return FIRST_LANE_POS + LANE_WIDTH
+        break;
       case 2:
-        return FIRST_LANE_POS+LANE_WIDTH*2
-        break;  
+        return FIRST_LANE_POS + LANE_WIDTH * 2
+        break;
       case 3:
-        return FIRST_LANE_POS+LANE_WIDTH*3
-        break;  
+        return FIRST_LANE_POS + LANE_WIDTH * 3
+        break;
       case 4:
-        return FIRST_LANE_POS+LANE_WIDTH*4
-        break;  
+        return FIRST_LANE_POS + LANE_WIDTH * 4
+        break;
       default:
         return -1
         break;
     }
   }
-  
-  function drawSingelCar(car)
-  {
+
+  function drawSingelCar(car) {
     lanePos = getLanePos(car.lane)
-    rectangle(car.posX,lanePos+20,80,60,car.color)
-    rectangle(car.posX+50,lanePos+30,30,30,"lightblue")
-    circle(car.posX+20,lanePos+80,13,"black")
-    circle(car.posX+60,lanePos+80,13,"black")
-      // if(DEBUG)
-      //    text (car.posX, lanePos, 20, "car.posX " + car.posX, "red")
-      //    text (car.posX-20, lanePos+20, 20, "car.posY " + lanePos, "black")
+    rectangle(car.posX, lanePos + 20, 80, 60, car.color)
+    rectangle(car.posX + 50, lanePos + 30, 30, 30, "lightblue")
+    circle(car.posX + 20, lanePos + 80, 13, "black")
+    circle(car.posX + 60, lanePos + 80, 13, "black")
+    // if(DEBUG)
+    //    text (car.posX, lanePos, 20, "car.posX " + car.posX, "red")
+    //    text (car.posX-20, lanePos+20, 20, "car.posY " + lanePos, "black")
   }
 
-  function drawPerson(man)
-  {    
-    rectangle(man.posX+53,man.posY+5,50,28,man.color)
-    rectangle(man.posX+48,man.posY+8,62,20,man.color)
-    circle(man.posX+78,man.posY+20,20,"black")
-    circle(man.posX+78,man.posY+20,10,"gray") 
+  function drawPerson(man) {
+    rectangle(man.posX + 53, man.posY + 5, 50, 28, man.color)
+    rectangle(man.posX + 48, man.posY + 8, 62, 20, man.color)
+    circle(man.posX + 78, man.posY + 20, 20, "black")
+    circle(man.posX + 78, man.posY + 20, 10, "gray")
     //  if(DEBUG)
     //    text (man.posX, man.posY, 20, "man.posX"  + man.posX, "red")
     //    text (man.posX, man.posY-20, 20, "man.posY " + man.posY, "black")
   }
-  function drawSingelBike(car)
-  {
+  function drawSingelBike(car) {
     lanePos = getLanePos(car.lane)
-    rectangle(car.posX+10,lanePos+40,60,20,car.color)
-    rectangle(car.posX+25,lanePos+20,30,20,car.color)
-    
-    circle(car.posX+20,lanePos+60,13,"black")
-    circle(car.posX+60,lanePos+60,13,"black")
-      // if(DEBUG)
-      //    text (car.posX, lanePos, 20, "car.posX " + car.posX, "red")
-      //    text (car.posX-20, lanePos+20, 20, "car.posY " + lanePos, "black")
+    rectangle(car.posX + 10, lanePos + 40, 60, 20, car.color)
+    rectangle(car.posX + 25, lanePos + 20, 30, 20, car.color)
+
+    circle(car.posX + 20, lanePos + 60, 13, "black")
+    circle(car.posX + 60, lanePos + 60, 13, "black")
+    // if(DEBUG)
+    //    text (car.posX, lanePos, 20, "car.posX " + car.posX, "red")
+    //    text (car.posX-20, lanePos+20, 20, "car.posY " + lanePos, "black")
+  }
+
+  function isPersonInFront(person) {
+    var personInFront = false
+    if (i > 0) {
+      for (p = 0; p < people.length; p++) {
+        if ((people[i].posX == people[p].posX) && (p < i) && (people[p].posY - people[i].posY) < 45)
+          personInFront = true
+      }
+    }
+    return personInFront
+  }
+
+  function shouldStop(person) {
+    var j = 0
+    while (j < cars.length) {
+      carPosY = getLanePos(cars[j].lane)
+      if ((carPosY > person.posY && (carPosY - person.posY) < SAFE_VEHICLE_DISTANCE) &&
+        ((abs(person.posX - cars[j].posX)) < 350)) {
+        // if ((person.posX > 500) && (person.jaywalker))
+        //   person.posX -= 1
+      }
+      if ((carPosY > person.posY && (carPosY - person.posY) < 25) &&
+        ((abs(person.posX - cars[j].posX)) < 120)) {
+        return true
+      }
+      j++
+    }
+    return false
   }
 </script>
 
 
 <body>
 </body>
+
 </html>
