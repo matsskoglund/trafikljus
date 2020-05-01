@@ -5,12 +5,12 @@
 <script src="http://koda.nu/simple.js">
 
 
-  var a = 60;
+  
   var timer = 0;
   var timerStarted = false;
   const FIRST_LANE_POS = 270
   const LANE_WIDTH = 170
-  
+
   const DEBUG = true
   const TRAFFIC_START_POS = 250
   const WALKER_START_POS = 10
@@ -41,29 +41,23 @@
 
   function update() {
     picture(0, 0, "http://koda.nu/bilder/iis/trafikljus/street.png", totalWidth, totalHeight);
-    text(200, 200, 20, timer, "blue")
-    if (initiated == false) {
-      // Generate traffic lanes
-      for (laneIdx = 0; laneIdx < 5; laneIdx++) {
-        newLane = {
-          pos: FIRST_LANE_POS,
-          laneIndex: laneIdx,
-          generateCars: 0
-        }
-        lanes.push(newLane)
-      }
-    }
 
     // Generate cars
-    if(generateCarTimer == 0){
+    if (generateCarTimer == 0) {
+      // Select a lane to generate car in at random
       laneIdx = random(5)
+
+      // Create a new car
       newCar = {
-          color: randomColor(),
-          lane: laneIdx,
-          vehicleType: random(TRAFFIC_TYPE_COUNT),
-          speed: random(5) + LOWEST_TRAFFIC_SPEED,
-          posX: TRAFFIC_START_POS
-        };
+        color: randomColor(),
+        lane: laneIdx,
+        vehicleType: random(TRAFFIC_TYPE_COUNT),
+        speed: random(5) + LOWEST_TRAFFIC_SPEED,
+        posX: TRAFFIC_START_POS
+      };
+
+      // Check if there already is a car in the beginning of the lane
+      // In that case, don't add the
       var carInFront = false
       var p = 0
       while (carInFront == false && p < cars.length) {
@@ -72,10 +66,10 @@
         p++
       }
       if (!carInFront)
-          cars.push(newCar)
+        cars.push(newCar)
 
-        generateCarTimer = random(10) + SHORTEST_TIME_BETWEEN_NEW_VECHICLE
-    }else{
+      generateCarTimer = random(10) + SHORTEST_TIME_BETWEEN_NEW_VECHICLE
+    } else {
       generateCarTimer--
     }
 
@@ -112,15 +106,15 @@
     for (i = 0; i < cars.length; i++) {
       // Find out if there is a vehicle in front so we can avoid running into it
       //var isCarInFront = false
-      
+
       carInFront = getCarInFront(cars[i])
-      if((carInFront != null) && carInFront.speed< cars[i].speed)
+      if ((carInFront != null) && carInFront.speed < cars[i].speed)
         cars[i].speed = carInFront.speed
 
       if ((trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].posX < 370)) || (cars[i].posX > 370))) {
-        if (carInFront == null){
+        if (carInFront == null) {
           cars[i].posX += cars[i].speed
-        }else if (cars[i].speed > carInFront.speed)
+        } else if (cars[i].speed > carInFront.speed)
           cars[i].speed += carInFront.speed
       }
       if (cars[i].vehicleType == 0)
@@ -152,7 +146,7 @@
       timerStarted = false;
       timer = 0
     }
-    
+
   }
 
   function getPeopleWaitingCount() {
@@ -296,41 +290,41 @@
     }
     return false
   }
-  function getCarInFront(car){
+  function getCarInFront(car) {
     var isCarInFront = false
-      if (i > 0) {
-        var p = 0
-        while (p < cars.length && !isCarInFront) {
-          if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
-            return cars[p]
-            //isCarInFront = true
-            //carInFront = cars[p]
+    if (i > 0) {
+      var p = 0
+      while (p < cars.length && !isCarInFront) {
+        if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
+          return cars[p]
+          //isCarInFront = true
+          //carInFront = cars[p]
 
-            // Set the speed to same as car in front
-            //cars[i].speed = carInFront.speed
-          }
-          p++
+          // Set the speed to same as car in front
+          //cars[i].speed = carInFront.speed
         }
+        p++
       }
+    }
     return null
   }
 
-  function getSpeedOfCarInFront(car){
+  function getSpeedOfCarInFront(car) {
     var isCarInFront = false
-      if (i > 0) {
-        var p = 0
-        while (p < cars.length && !isCarInFront) {
-          if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
-            return cars[p].speed
-            //isCarInFront = true
-            //carInFront = cars[p]
+    if (i > 0) {
+      var p = 0
+      while (p < cars.length && !isCarInFront) {
+        if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
+          return cars[p].speed
+          //isCarInFront = true
+          //carInFront = cars[p]
 
-            // Set the speed to same as car in front
-            //cars[i].speed = carInFront.speed
-          }
-          p++
+          // Set the speed to same as car in front
+          //cars[i].speed = carInFront.speed
         }
+        p++
       }
+    }
     return car.speed
   }
 </script>
