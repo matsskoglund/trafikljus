@@ -46,30 +46,26 @@
         }
         lanes.push(newLane)
       }
-      // Generate people lanes
-      for(laneIdx=0;laneIdx<5;laneIdx++){
-        newLane={
-          pos: FIRST_WALKING_LANE_POS,
-          laneIndex:laneIdx,
-          generatePeople:0,
-          people: Array()
-        }
-        peopleLanes.push(newLane)
-      }
-      initiated = true
+
     }
     // Generate cars for each lane
     for(laneIdx=0;laneIdx<5;laneIdx++){
-      if((lanes[laneIdx].generateCars == 0) && (trafficRunning(timer))){
+      if((lanes[laneIdx].generateCars == 0) ){
         newCar = {
           color:getRandomColor(), 
           lane:laneIdx, 
           vehicleType: random(2),
           posX:TRAFFIC_START_POS  
         }; 
-        cars.push(newCar)
+        var carInFront = false       
+        for(p=0;p<cars.length;p++){
+          if((newCar.posY == cars[p].posY) && (newCar.posX == cars[p].posX))
+            carInFront = true
+        }
+        if(!carInFront)
+          cars.push(newCar)
         lanes[laneIdx].generateCars = random(90)+50
-      }else if (trafficRunning(timer)){
+      }else{
         lanes[laneIdx].generateCars--
       }
     }
@@ -89,8 +85,15 @@
             posX: 520 + random(5)*70,
             jaywalker: jayWalker
           }; 
-      people.push(newMan)
-      generatePeople = random(60) + 30
+      var personInFront = false    
+      for(p=0;p<people.length;p++){
+        if((newMan.posX == people[p].posX) && (newMan.posY == people[p].posY))
+          personInFront = true
+      }
+      
+      if(!personInFront)
+        people.push(newMan)
+      generatePeople = random(30) + 20
     }else{
       generatePeople--
     }
@@ -120,54 +123,21 @@
       
       drawPerson(people[i])
     }
-    // // Generate people
-    // for(laneIdx=0; laneIdx <= 4; laneIdx++){    
-    //   if((peopleLanes[laneIdx].generatePeople == 0) && (peopleLanes[laneIdx].people.length < 40)){
-    //     newMan = {
-    //       color:getRandomColor(), 
-    //       lane:laneIdx, 
-    //       pos:WALKER_START_POS,          
-    //     }; 
-        
-    //     people.push(newMan)
-
-    //     peopleLanes[laneIdx].people.push(newMan)
-    //     peopleLanes[laneIdx].generatePeople = Math.floor(Math.random() * 60 + 30 )
-    //   }else{
-    //     peopleLanes[laneIdx].generatePeople--
-    //   }
-    // }
     
-    // // Generate people
-    // for(laneIdx=0; laneIdx <= 4; laneIdx++){    
-    //   for(personIdx = 0; personIdx < peopleLanes[laneIdx].people.length; personIdx++){
-    //     currentPerson = peopleLanes[laneIdx].people[personIdx]
-        
-    //      if(personIdx > 0){
-    //        personInFront = peopleLanes[laneIdx].people[personIdx-1]
-          
-    //      }else  
-    //        personInFront = null
-    //     if(walkOk(timer) ||
-    //     (currentPerson.pos < 130) && (personInFront == null) ||
-    //     (currentPerson.pos < 130) && (personInFront != null) && ((personInFront.pos - currentPerson.pos) > 45)||
-    //     currentPerson.pos > 130)
-       
-    //     {
-    //       peopleLanes[laneIdx].people[personIdx].pos += 3
-    //    }
-    //     drawMan(peopleLanes[laneIdx].people[personIdx])
-      
-    //   if(peopleLanes[laneIdx].people[personIdx] >= WALKERS_END_POS){
-    //      peopleLanes[laneIdx].people[personIdx].splice(i, 1)       
-    //    }
-    //   }
-    // }
 
     // Draw cars
     for(i = 0; i < cars.length; i++){
-      if(trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].posX < 370))|| (cars[i].posX > 370)){
-        cars[i].posX += 3
+      var carInFront = false
+      if(i > 0){
+        for(p=0;p<cars.length;p++){
+          if((cars[i].lane == cars[p].lane) && (p<i) && (cars[p].posX - cars[i].posX)<150)
+            carInFront = true
+        }
+      }
+
+      if( (trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].posX < 370))|| (cars[i].posX > 370))){
+        if(carInFront==false)
+          cars[i].posX += 3
       }
       if(cars[i].vehicleType == 0)
         drawSingelCar(cars[i])
@@ -280,29 +250,7 @@ function getRandomColor() {
         break;
     }
   }
-  function getWalkingLanePos(laneNo)
-  {
-    switch (laneNo) {
-      case 0:
-        return FIRST_WALKING_LANE_POS
-        break;
-      case 1:
-        return FIRST_WALKING_LANE_POS+WALKING_LANE_WIDTH
-        break;  
-      case 2:
-        return FIRST_WALKING_LANE_POS+WALKING_LANE_WIDTH*2
-        break;  
-      case 3:
-        return FIRST_WALKING_LANE_POS+WALKING_LANE_WIDTH*3
-        break;  
-      case 4:
-        return FIRST_WALKING_LANE_POS+WALKING_LANE_WIDTH*4
-        break;  
-      default:
-        return -1
-        break;
-    }
-  }
+  
   function drawSingelCar(car)
   {
     lanePos = getLanePos(car.lane)
@@ -310,19 +258,9 @@ function getRandomColor() {
     rectangle(car.posX+50,lanePos+30,30,30,"lightblue")
     circle(car.posX+20,lanePos+80,13,"black")
     circle(car.posX+60,lanePos+80,13,"black")
-    //  if(DEBUG)
-        // text (car.posX, lanePos, 20, "car.posX " + car.posX, "red")
-        // text (car.posX-20, lanePos+20, 20, "car.posY " + lanePos, "black")
-  }
-  function drawMan(man)
-  {
-    lanePos = getWalkingLanePos(man.lane)
-    rectangle(lanePos+53,man.pos+5,50,28,man.color)
-    rectangle(lanePos+48,man.pos+8,62,20,man.color)
-    circle(lanePos+78,man.pos+20,20,"black")
-    circle(lanePos+78,man.pos+20,10,"gray") 
-    // if(DEBUG)
-    //   text (lanePos, man.pos, 20, man.pos, "red")
+      // if(DEBUG)
+      //    text (car.posX, lanePos, 20, "car.posX " + car.posX, "red")
+      //    text (car.posX-20, lanePos+20, 20, "car.posY " + lanePos, "black")
   }
 
   function drawPerson(man)
@@ -343,9 +281,9 @@ function getRandomColor() {
     
     circle(car.posX+20,lanePos+60,13,"black")
     circle(car.posX+60,lanePos+60,13,"black")
-    //  if(DEBUG)
-        // text (car.posX, lanePos, 20, "car.posX " + car.posX, "red")
-        // text (car.posX-20, lanePos+20, 20, "car.posY " + lanePos, "black")
+      // if(DEBUG)
+      //    text (car.posX, lanePos, 20, "car.posX " + car.posX, "red")
+      //    text (car.posX-20, lanePos+20, 20, "car.posY " + lanePos, "black")
   }
 </script>
 
