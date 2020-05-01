@@ -25,7 +25,8 @@
   const PEOPLE_DISTANCE = 40
   const PEOPLE_WAITING_TRIGGER = 25
   const SAFE_VEHICLE_DISTANCE = 120
-
+  const BOARD_WALK_POSITION = 130
+  const STOP_LINE_POSITION = 370
   var ticker = TRAFFIC_START_POS
 
   var carDistanceTimer = 100
@@ -37,7 +38,6 @@
   var cars = new Array()
   var people = new Array()
   var lanes = new Array()
-
 
   function update() {
     picture(0, 0, "http://koda.nu/bilder/iis/trafikljus/street.png", totalWidth, totalHeight);
@@ -61,7 +61,7 @@
       var carInFront = false
       var p = 0
       while (carInFront == false && p < cars.length) {
-        if ((newCar.posY == cars[p].posY) && (cars[p].posX - newCar.posX) < 100)
+        if ((newCar.posY == cars[p].posY) && (cars[p].posX - newCar.posX) < SAFE_VEHICLE_DISTANCE)
           carInFront = true
         p++
       }
@@ -88,14 +88,11 @@
     // Move each person
     for (i = 0; i < people.length; i++) {
       // Find out if we should stop. If a person is about to run into a car she should stop
-      // Loop through each car and find out if the person is close to any car
-
+      // Loop through each car an
       stop = shouldStop(people[i])
-
       pif = isPersonInFront(people[i])
 
-
-      if (people[i].jaywalker && (!stop) || walkOk(timer) || (people[i].posY < 130 && !pif) || (people[i].posY > 130 && (!stop)))
+      if (people[i].jaywalker && (!stop) || walkOk(timer) || (people[i].posY < BOARD_WALK_POSITION && !pif) || (people[i].posY > BOARD_WALK_POSITION && (!stop)))
         people[i].posY += people[i].speed
 
       drawPerson(people[i])
@@ -105,13 +102,11 @@
     // Draw cars
     for (i = 0; i < cars.length; i++) {
       // Find out if there is a vehicle in front so we can avoid running into it
-      //var isCarInFront = false
-
       carInFront = getCarInFront(cars[i])
       if ((carInFront != null) && carInFront.speed < cars[i].speed)
         cars[i].speed = carInFront.speed
 
-      if ((trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].posX < 370)) || (cars[i].posX > 370))) {
+      if ((trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].posX < STOP_LINE_POSITION)) || (cars[i].posX > STOP_LINE_POSITION))) {
         if (carInFront == null) {
           cars[i].posX += cars[i].speed
         } else if (cars[i].speed > carInFront.speed)
@@ -236,9 +231,6 @@
     rectangle(car.posX + 50, lanePos + 30, 30, 30, "lightblue")
     circle(car.posX + 20, lanePos + 80, 13, "black")
     circle(car.posX + 60, lanePos + 80, 13, "black")
-    // if(DEBUG)
-    //    text (car.posX, lanePos, 20, "car.posX " + car.posX, "red")
-    //    text (car.posX-20, lanePos+20, 20, "car.posY " + lanePos, "black")
   }
 
   function drawPerson(man) {
@@ -246,9 +238,6 @@
     rectangle(man.posX + 48, man.posY + 8, 62, 20, man.color)
     circle(man.posX + 78, man.posY + 20, 20, "black")
     circle(man.posX + 78, man.posY + 20, 10, "gray")
-    //  if(DEBUG)
-    //    text (man.posX, man.posY, 20, "man.posX"  + man.posX, "red")
-    //    text (man.posX, man.posY-20, 20, "man.posY " + man.posY, "black")
   }
   function drawSingelBike(car) {
     lanePos = getLanePos(car.lane)
@@ -257,9 +246,6 @@
 
     circle(car.posX + 20, lanePos + 60, 13, "black")
     circle(car.posX + 60, lanePos + 60, 13, "black")
-    // if(DEBUG)
-    //    text (car.posX, lanePos, 20, "car.posX " + car.posX, "red")
-    //    text (car.posX-20, lanePos+20, 20, "car.posY " + lanePos, "black")
   }
 
   function isPersonInFront(person) {
@@ -297,11 +283,6 @@
       while (p < cars.length && !isCarInFront) {
         if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
           return cars[p]
-          //isCarInFront = true
-          //carInFront = cars[p]
-
-          // Set the speed to same as car in front
-          //cars[i].speed = carInFront.speed
         }
         p++
       }
@@ -316,11 +297,6 @@
       while (p < cars.length && !isCarInFront) {
         if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
           return cars[p].speed
-          //isCarInFront = true
-          //carInFront = cars[p]
-
-          // Set the speed to same as car in front
-          //cars[i].speed = carInFront.speed
         }
         p++
       }
