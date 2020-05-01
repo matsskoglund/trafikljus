@@ -46,7 +46,6 @@
         }
         lanes.push(newLane)
       }
-
     }
     // Generate cars for each lane
     for(laneIdx=0;laneIdx<5;laneIdx++){
@@ -55,12 +54,14 @@
           color:getRandomColor(), 
           lane:laneIdx, 
           vehicleType: random(2),
+          speed: random(5)+3,
           posX:TRAFFIC_START_POS  
         }; 
         var carInFront = false       
         for(p=0;p<cars.length;p++){
           if((newCar.posY == cars[p].posY) && (newCar.posX == cars[p].posX))
             carInFront = true
+
         }
         if(!carInFront)
           cars.push(newCar)
@@ -76,14 +77,19 @@
       
       var randomNumber = random(100)
       var jayWalker = false
-      if(randomNumber >90)
+      walkSpeed = 4
+      if(randomNumber >75){
         jayWalker = true
+        walkSpeed = 6
+      }
+
       newMan = {
             color:randomColor(),
             lane:laneIdx, 
             posY:WALKER_START_POS,
             posX: 520 + random(5)*70,
-            jaywalker: jayWalker
+            jaywalker: jayWalker,
+            speed: walkSpeed
           }; 
       var personInFront = false    
       for(p=0;p<people.length;p++){
@@ -97,14 +103,27 @@
     }else{
       generatePeople--
     }
+    // Calculate numbers in line
+    var peopleInLine = 0
+    for(p=0;p<people.length;p++){
+      if(people[p].posY < 130)
+        peopleInLine ++
+    }
+    if (peopleInLine > 10)
+      timerStarted = true
     for(i=0;i<people.length;i++){
       // Find out if we should stop
       stop = false
       for(j=0;j<cars.length;j++){
-        /*if(DEBUG)
-          text (100, 200, 20, carLanePos, "black")*/
+
         carPosY = getLanePos(cars[j].lane)
        // text (cars[j].posX, carPosY-20, 20, people[i].posX - cars[j].posX, "blue")
+       if( (carPosY > people[i].posY  && (carPosY - people[i].posY) < 120) &&
+             ((abs(people[i].posX - cars[j].posX)) < 350) ) {
+            if((people[i].posX > 500) && (people[i].jaywalker))
+              people[i].posX -= 1
+            
+        }
         if( (carPosY > people[i].posY  && (carPosY - people[i].posY) < 25) &&
              ((abs(people[i].posX - cars[j].posX)) < 120) ) {
             stop = true
@@ -119,7 +138,7 @@
       }
 
       if(people[i].jaywalker && (!stop) || walkOk(timer) || (people[i].posY < 130 && !personInFront) || (people[i].posY > 130 && (!stop)))
-        people[i].posY += 4
+        people[i].posY += people[i].speed
       
       drawPerson(people[i])
     }
@@ -130,14 +149,16 @@
       var carInFront = false
       if(i > 0){
         for(p=0;p<cars.length;p++){
-          if((cars[i].lane == cars[p].lane) && (p<i) && (cars[p].posX - cars[i].posX)<150)
+          if((cars[i].lane == cars[p].lane) && (p<i) && (cars[p].posX - cars[i].posX)<100)
             carInFront = true
+            //cars[i].speed = cars[p].speed
         }
       }
 
       if( (trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].posX < 370))|| (cars[i].posX > 370))){
         if(carInFront==false)
-          cars[i].posX += 3
+          cars[i].posX += cars[i].speed
+        
       }
       if(cars[i].vehicleType == 0)
         drawSingelCar(cars[i])
