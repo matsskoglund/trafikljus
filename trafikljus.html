@@ -22,10 +22,10 @@
   const NORMAL_WALKSPEED = 4
   const LOWEST_TRAFFIC_SPEED = 3
   const TRAFFIC_TYPE_COUNT = 2
-  const SHORTEST_TIME_BETWEEN_NEW_VECHICLE = 30
+  const SHORTEST_TIME_BETWEEN_NEW_VECHICLE = 10
   const LANE_COUNT = 5
   const PEOPLE_DISTANCE = 40
-  const PEOPLE_WAITING_TRIGGER = 5
+  const PEOPLE_WAITING_TRIGGER = 25
   const SAFE_VEHICLE_DISTANCE = 120
 
   var ticker = TRAFFIC_START_POS
@@ -76,7 +76,7 @@
         }
         if (!carInFront)
           cars.push(newCar)
-        lanes[laneIdx].generateCars = random(90) + SHORTEST_TIME_BETWEEN_NEW_VECHICLE
+        lanes[laneIdx].generateCars = random(40) + SHORTEST_TIME_BETWEEN_NEW_VECHICLE
       } else {
         lanes[laneIdx].generateCars--
       }
@@ -91,7 +91,7 @@
     }
     // Calculate number of people waiting
     peopleInLine = getPeopleWaitingCount()
-    if (peopleInLine > 2)
+    if (peopleInLine > PEOPLE_WAITING_TRIGGER)
       timerStarted = true
 
     // Move each person
@@ -113,25 +113,18 @@
 
     // Draw cars
     for (i = 0; i < cars.length; i++) {
-      // Find out if there is a vehicle in front so we can avoid running into it if we go
-      var isCarInFront = false
-      var carInFront = null
-      if (i > 0) {
-        var p = 0
-        while (p < cars.length && !isCarInFront) {
-          if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
-            isCarInFront = true
-            carInFront = cars[p]
-            cars[i].speed = carInFront.speed
-          }
-          p++
-        }
-      }
+      // Find out if there is a vehicle in front so we can avoid running into it
+      //var isCarInFront = false
+      
+      carInFront = getCarInFront(cars[i])
+      if((carInFront != null) && carInFront.speed< cars[i].speed)
+        cars[i].speed = carInFront.speed
 
       if ((trafficRunning(timer) || (!trafficRunning(timer) && (cars[i].posX < 370)) || (cars[i].posX > 370))) {
-        if (isCarInFront == false)
+        if (carInFront == null){
           cars[i].posX += cars[i].speed
-
+        }else if (cars[i].speed > carInFront.speed)
+          cars[i].speed += carInFront.speed
       }
       if (cars[i].vehicleType == 0)
         drawSingelCar(cars[i])
@@ -322,6 +315,43 @@
       j++
     }
     return false
+  }
+  function getCarInFront(car){
+    var isCarInFront = false
+      if (i > 0) {
+        var p = 0
+        while (p < cars.length && !isCarInFront) {
+          if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
+            return cars[p]
+            //isCarInFront = true
+            //carInFront = cars[p]
+
+            // Set the speed to same as car in front
+            //cars[i].speed = carInFront.speed
+          }
+          p++
+        }
+      }
+    return null
+  }
+
+  function getSpeedOfCarInFront(car){
+    var isCarInFront = false
+      if (i > 0) {
+        var p = 0
+        while (p < cars.length && !isCarInFront) {
+          if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
+            return cars[p].speed
+            //isCarInFront = true
+            //carInFront = cars[p]
+
+            // Set the speed to same as car in front
+            //cars[i].speed = carInFront.speed
+          }
+          p++
+        }
+      }
+    return car.speed
   }
 </script>
 
