@@ -10,13 +10,12 @@
   var timerStarted = false;
   const FIRST_LANE_POS = 270
   const LANE_WIDTH = 170
-
   const DEBUG = true
   const TRAFFIC_START_POS = 250
   const WALKER_START_POS = 10
   const TRAFFIC_END_POS = 1110
   const WALKERS_END_POS = 1210
-  const JAYWALKER_PERCENTAGE = 50
+  const JAYWALKER_PERCENTAGE = 0
   const NORMAL_WALKSPEED = 4
   const LOWEST_TRAFFIC_SPEED = 3
   const TRAFFIC_TYPE_COUNT = 2
@@ -24,9 +23,11 @@
   const LANE_COUNT = 5
   const PEOPLE_DISTANCE = 40
   const PEOPLE_WAITING_TRIGGER = 25
-  const SAFE_VEHICLE_DISTANCE = 120
+  const SAFE_VEHICLE_Y_DISTANCE = 80
+  const SAFE_VEHICLE_X_DISTANCE = 70
   const BOARD_WALK_POSITION = 130
   const STOP_LINE_POSITION = 370
+  const CROSSING_LEFT_POSITION = 600
   var ticker = TRAFFIC_START_POS
 
   var carDistanceTimer = 100
@@ -43,7 +44,7 @@
     picture(0, 0, "http://koda.nu/bilder/iis/trafikljus/street.png", totalWidth, totalHeight);
 
     // Generate cars
-    if (generateCarTimer == 0) {
+    //if (generateCarTimer == 0) {
       // Select a lane to generate car in at random
       laneIdx = random(5)
 
@@ -61,7 +62,7 @@
       var carInFront = false
       var p = 0
       while (carInFront == false && p < cars.length) {
-        if ((newCar.posY == cars[p].posY) && (cars[p].posX - newCar.posX) < SAFE_VEHICLE_DISTANCE)
+        if ((newCar.posY == cars[p].posY) && (cars[p].posX - newCar.posX) < SAFE_VEHICLE_Y_DISTANCE)
           carInFront = true
         p++
       }
@@ -69,9 +70,9 @@
         cars.push(newCar)
 
       generateCarTimer = random(10) + SHORTEST_TIME_BETWEEN_NEW_VECHICLE
-    } else {
-      generateCarTimer--
-    }
+    // } else {
+    //   generateCarTimer--
+    // }
 
     // Generate people if generatePeople timer has reached zero    
     if (generatePeople == 0) {
@@ -90,6 +91,7 @@
       // Find out if we should stop. If a person is about to run into a car she should stop
       // Loop through each car an
       stop = shouldStop(people[i])
+      
       pif = isPersonInFront(people[i])
 
       if (people[i].jaywalker && (!stop) || walkOk(timer) || (people[i].posY < BOARD_WALK_POSITION && !pif) || (people[i].posY > BOARD_WALK_POSITION && (!stop)))
@@ -147,7 +149,7 @@
   function getPeopleWaitingCount() {
     var peopleInLine = 0
     for (p = 0; p < people.length; p++) {
-      if (people[p].posY < 130)
+      if (people[p].posY < BOARD_WALK_POSITION)
         peopleInLine++
     }
     return peopleInLine
@@ -163,12 +165,12 @@
       jayWalker = true
       walkSpeed = 6
     }
-
+    
     newMan = {
       color: randomColor(),
-      lane: laneIdx,
+      
       posY: WALKER_START_POS,
-      posX: 520 + random(5) * 70,
+      posX: CROSSING_LEFT_POSITION + random(5) * 70,
       jaywalker: jayWalker,
       speed: walkSpeed
     };
@@ -265,13 +267,9 @@
     var j = 0
     while (j < cars.length) {
       carPosY = getLanePos(cars[j].lane)
-      if ((carPosY > person.posY && (carPosY - person.posY) < SAFE_VEHICLE_DISTANCE) &&
-        ((abs(person.posX - cars[j].posX)) < 350)) {
-        // if ((person.posX > 500) && (person.jaywalker))
-        //   person.posX -= 1
-      }
-      if ((carPosY > person.posY && (carPosY - person.posY) < 25) &&
-        ((abs(person.posX - cars[j].posX)) < 120)) {
+   
+      if ((carPosY > person.posY && (carPosY - person.posY) < SAFE_VEHICLE_Y_DISTANCE) &&
+        ((abs(person.posX - cars[j].posX)) < SAFE_VEHICLE_X_DISTANCE)) {
         return true
       }
       j++
