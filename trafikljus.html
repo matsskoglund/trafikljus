@@ -163,14 +163,9 @@
       jayWalker = true
       walkSpeed = 6
     }
-    var ran = random(100)
-    if((ran > 50) && (jayWalker != true)){
-      directionUp = true
-    }else 
-      directionUp = false
+        
     newMan = {
-      color: randomColor(),
-      direction: directionUp,
+      color: randomColor(),    
       posY: WALKER_START_POS,
       posX: CROSSING_LEFT_POSITION + random(5) * 70,
       jaywalker: jayWalker,
