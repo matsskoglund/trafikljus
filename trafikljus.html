@@ -16,7 +16,7 @@
   const WALKER_START_POS = 10
   const TRAFFIC_END_POS = 1110
   const WALKERS_END_POS = 1210
-  const JAYWALKER_PERCENTAGE = 10
+  const JAYWALKER_PERCENTAGE = 50
   const NORMAL_WALKSPEED = 4
   const LOWEST_TRAFFIC_SPEED = 3
   const TRAFFIC_TYPE_COUNT = 2
@@ -227,25 +227,27 @@
 
   function drawSingelCar(car) {
     lanePos = getLanePos(car.lane)
-    rectangle(car.posX, lanePos + 20, 80, 60, car.color)
-    rectangle(car.posX + 50, lanePos + 30, 30, 30, "lightblue")
-    circle(car.posX + 20, lanePos + 80, 13, "black")
-    circle(car.posX + 60, lanePos + 80, 13, "black")
+    rectangle(car.posX-40, lanePos-30, 80, 60, car.color)
+    rectangle(car.posX+10, lanePos-23, 30, 30, "lightblue")
+    circle(car.posX-25, lanePos+30, 13, "black")
+    circle(car.posX + 25, lanePos + 30, 13, "black")
+    circle(car.posX, lanePos,2,"blue")
   }
 
   function drawPerson(man) {
-    rectangle(man.posX + 53, man.posY + 5, 50, 28, man.color)
-    rectangle(man.posX + 48, man.posY + 8, 62, 20, man.color)
-    circle(man.posX + 78, man.posY + 20, 20, "black")
-    circle(man.posX + 78, man.posY + 20, 10, "gray")
+    rectangle(man.posX-25, man.posY + 5, 50, 28, man.color)
+    rectangle(man.posX-31, man.posY + 9, 62, 20, man.color)
+    circle(man.posX, man.posY + 20, 20, "black")
+    circle(man.posX, man.posY + 20, 10, "gray")
   }
   function drawSingelBike(car) {
     lanePos = getLanePos(car.lane)
-    rectangle(car.posX + 10, lanePos + 40, 60, 20, car.color)
-    rectangle(car.posX + 25, lanePos + 20, 30, 20, car.color)
+    rectangle(car.posX - 30, lanePos-10, 60, 20, car.color)
+    rectangle(car.posX - 15, lanePos - 20, 30, 20, car.color)
 
-    circle(car.posX + 20, lanePos + 60, 13, "black")
-    circle(car.posX + 60, lanePos + 60, 13, "black")
+    circle(car.posX - 20, lanePos + 10, 13, "black")
+    circle(car.posX + 20, lanePos + 10, 13, "black")
+    circle(car.posX, lanePos, 2, "blue")
   }
 
   function isPersonInFront(person) {
