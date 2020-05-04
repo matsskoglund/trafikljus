@@ -3,11 +3,7 @@
 <head>
 </head>
 <script src="http://koda.nu/simple.js">
-
-
-
-  var timer = 0;
-  var timerStarted = false;
+  
   const FIRST_LANE_POS = 270
   const LANE_WIDTH = 170
   const DEBUG = true
@@ -29,8 +25,11 @@
   const STOP_LINE_POSITION = 370
   const CROSSING_LEFT_POSITION = 600
   const WAIT_TIME_FROM_BUTTON_PRESS = 60
+  const MIN_DISTANCE_BETWEEN_VEHICLE = 100
   var ticker = TRAFFIC_START_POS
 
+  var timer = 0
+  var timerStarted = false
   var carDistanceTimer = 100
   var generateCars = 0
   var generatePeople = 40
@@ -273,12 +272,13 @@
     }
     return false
   }
+
   function getCarInFront(car) {
     var isCarInFront = false
     if (i > 0) {
       var p = 0
       while (p < cars.length && !isCarInFront) {
-        if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
+        if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < MIN_DISTANCE_BETWEEN_VEHICLE) {
           return cars[p]
         }
         p++
@@ -287,19 +287,6 @@
     return null
   }
 
-  function getSpeedOfCarInFront(car) {
-    var isCarInFront = false
-    if (i > 0) {
-      var p = 0
-      while (p < cars.length && !isCarInFront) {
-        if ((cars[i].lane == cars[p].lane) && (p < i) && (cars[p].posX - cars[i].posX) < 100) {
-          return cars[p].speed
-        }
-        p++
-      }
-    }
-    return car.speed
-  }
 </script>
 
 
