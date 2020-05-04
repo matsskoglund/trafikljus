@@ -10,8 +10,7 @@
   const TRAFFIC_START_POS = 250
   const WALKER_START_POS = 10
   const TRAFFIC_END_POS = 1110
-  const WALKERS_END_POS = 1210
-  const JAYWALKER_PERCENTAGE = 0
+  //const JAYWALKER_PERCENTAGE = 0
   const NORMAL_WALKSPEED = 4
   const LOWEST_TRAFFIC_SPEED = 3
   const TRAFFIC_TYPE_COUNT = 2
@@ -87,10 +86,11 @@
     for (i = 0; i < people.length; i++) {
       // Find out if we should stop. If a person is about to run into a car she should stop
 
-      stop = shouldStop(people[i])
+      //stop = shouldStop(people[i])
       pif = isPersonInFront(people[i])
 
-      if (people[i].jaywalker && (!stop) || walkOk(timer) || (people[i].posY < BOARD_WALK_POSITION && !pif) || (people[i].posY > BOARD_WALK_POSITION && (!stop)))
+      //if (people[i].jaywalker && (!stop) || walkOk(timer) || (people[i].posY < BOARD_WALK_POSITION && !pif) || (people[i].posY > BOARD_WALK_POSITION && (!stop)))
+      if (walkOk(timer) || (people[i].posY < BOARD_WALK_POSITION && !pif) || (people[i].posY > BOARD_WALK_POSITION))
         people[i].posY += people[i].speed
 
       drawPerson(people[i])
@@ -154,20 +154,20 @@
   function generatePerson() {
 
     // Generate a jayWalker if threshhold is above specified number
-    var randomNumber = random(100)
-    var jayWalker = false
+    //var randomNumber = random(100)
+    //var jayWalker = false
     walkSpeed = NORMAL_WALKSPEED
     
-    if (randomNumber > (100 - JAYWALKER_PERCENTAGE)) {
-      jayWalker = true
-      walkSpeed = 6
-    }
+    // if (randomNumber > (100 - JAYWALKER_PERCENTAGE)) {
+    //   jayWalker = true
+    //   walkSpeed = 6
+    // }
         
     newMan = {
       color: randomColor(),    
       posY: WALKER_START_POS,
       posX: CROSSING_LEFT_POSITION + random(5) * 70,
-      jaywalker: jayWalker,
+      //jaywalker: jayWalker,
       speed: walkSpeed
     };
  
@@ -232,20 +232,20 @@
     circle(car.posX, lanePos, 2, "blue")
   }
 
+  function drawCar(car) {
+    lanePos = getLanePos(car.lane)
+    rectangle(car.posX - 30, lanePos - 10, 60, 20, car.color)
+    rectangle(car.posX - 15, lanePos - 20, 30, 20, car.color)
+    
+    circle(car.posX - 20, lanePos + 10, 13, "black")
+    circle(car.posX + 20, lanePos + 10, 13, "black")
+    circle(car.posX, lanePos, 2, "blue")
+  }
   function drawPerson(man) {
     rectangle(man.posX - 25, man.posY + 5, 50, 28, man.color)
     rectangle(man.posX - 31, man.posY + 9, 62, 20, man.color)
     circle(man.posX, man.posY + 20, 20, "black")
     circle(man.posX, man.posY + 20, 10, "gray")
-  }
-  function drawCar(car) {
-    lanePos = getLanePos(car.lane)
-    rectangle(car.posX - 30, lanePos - 10, 60, 20, car.color)
-    rectangle(car.posX - 15, lanePos - 20, 30, 20, car.color)
-
-    circle(car.posX - 20, lanePos + 10, 13, "black")
-    circle(car.posX + 20, lanePos + 10, 13, "black")
-    circle(car.posX, lanePos, 2, "blue")
   }
 
   function isPersonInFront(person) {
@@ -259,19 +259,19 @@
     return personInFront
   }
 
-  function shouldStop(person) {
-    var j = 0
-    while (j < cars.length) {
-      carPosY = getLanePos(cars[j].lane)
+  // function shouldStop(person) {
+  //   var j = 0
+  //   while (j < cars.length) {
+  //     carPosY = getLanePos(cars[j].lane)
 
-      if ((carPosY > person.posY && (carPosY - person.posY) < SAFE_VEHICLE_Y_DISTANCE) &&
-        ((abs(person.posX - cars[j].posX)) < SAFE_VEHICLE_X_DISTANCE)) {
-        return true
-      }
-      j++
-    }
-    return false
-  }
+  //     if ((carPosY > person.posY && (carPosY - person.posY) < SAFE_VEHICLE_Y_DISTANCE) &&
+  //       ((abs(person.posX - cars[j].posX)) < SAFE_VEHICLE_X_DISTANCE)) {
+  //       return true
+  //     }
+  //     j++
+  //   }
+  //   return false
+  // }
 
   function getCarInFront(car) {
     var isCarInFront = false
